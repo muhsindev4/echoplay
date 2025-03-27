@@ -8,6 +8,13 @@ class PlaybackController extends GetxController {
   final ConcatenatingAudioSource playlist = ConcatenatingAudioSource(children: []);
   final RxInt currentIndex = 0.obs;
 
+  bool isPlaying(String path) {
+    return player.playing &&
+        player.currentIndex != null &&
+        playlist.children.isNotEmpty &&
+       ( playlist.children[player.currentIndex!] as UriAudioSource).uri.path==path;
+  }
+
   Future<void> playAll(List<FileData> files) async {
     try {
       playlist.clear(); // Clear existing playlist
@@ -19,11 +26,12 @@ class PlaybackController extends GetxController {
             title: file.name,
             album: "Downloads",
             artist: "Unknown",
+            duration: file.duration,
+            artUri:Uri.tryParse(file.thumbnails??"") ,
             extras: {"filePath": file.path},
           ),
         ));
       }
-
       await player.setAudioSource(playlist);
       await player.play();
       player.currentIndexStream.listen((index) {
@@ -31,6 +39,7 @@ class PlaybackController extends GetxController {
           currentIndex.value = index;
         }
       });
+      update();
     } catch (e) {
       print("Error playing playlist: $e");
     }
@@ -51,6 +60,7 @@ class PlaybackController extends GetxController {
 
       await player.setAudioSource(audioSource);
       await player.play();
+      update();
     } catch (e) {
       print("Error playing file: $e");
     }
@@ -59,16 +69,24 @@ class PlaybackController extends GetxController {
   void playNext() {
     if (currentIndex.value < playlist.length - 1) {
       player.seekToNext();
+      update();
     }
   }
 
   void playPrevious() {
     if (currentIndex.value > 0) {
       player.seekToPrevious();
+      update();
     }
+  }
+
+  void pause() {
+    player.pause();
+    update();
   }
 
   void stop() {
     player.stop();
+    update();
   }
 }

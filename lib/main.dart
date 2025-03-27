@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -21,7 +22,7 @@ Future<void> main() async {
     if (value.isNotEmpty) {
       String? argument = value.first.path;
       print("ReceiveSharingIntent : $argument");
-      Get.put(DownloadController(), permanent: true).downloadUrl(argument);
+      Get.put(DownloadController(), permanent: true).initUrl(argument);
     }
   }, onError: (err) {
     print("getIntentDataStream error: $err");
@@ -32,7 +33,7 @@ Future<void> main() async {
     if (value.isNotEmpty) {
       String? argument = value.first.path;
       print("ReceiveSharingIntent2 : $argument");
-      Get.put(DownloadController(), permanent: true).downloadUrl(argument);
+      Get.put(DownloadController(), permanent: true).initUrl(argument);
       ReceiveSharingIntent.instance.reset();
     }
   });
