@@ -1,22 +1,44 @@
-class FileData {
+import 'package:hive/hive.dart';
+
+part 'file_data.g.dart';
+
+@HiveType(typeId: 0)
+class FileData extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String name;
-  final String? path;
-  final String? description;
-  final String? thumbnails;
-  final Duration? duration;
+
+  @HiveField(2)
+  final String description;
+
+  @HiveField(3)
+  final String thumbnails;
+
+  @HiveField(4)
+  final int? duration;
+
+  @HiveField(5)
   final DateTime? publishDate;
+
+  @HiveField(6)
+  final String? path;
+
+  @HiveField(7)
   final bool isDownload;
+
+  @HiveField(8)
   final double downloadProgress;
 
   FileData({
     required this.id,
     required this.name,
-    this.path,
-    this.description,
-    this.thumbnails,
+    required this.description,
+    required this.thumbnails,
     this.duration,
     this.publishDate,
+    this.path,
     this.isDownload = false,
     this.downloadProgress = 0.0,
   });
@@ -24,52 +46,24 @@ class FileData {
   FileData copyWith({
     String? id,
     String? name,
-    String? path,
     String? description,
     String? thumbnails,
-    Duration? duration,
+    int? duration,
     DateTime? publishDate,
+    String? path,
     bool? isDownload,
     double? downloadProgress,
   }) {
     return FileData(
       id: id ?? this.id,
       name: name ?? this.name,
-      path: path ?? this.path,
       description: description ?? this.description,
       thumbnails: thumbnails ?? this.thumbnails,
       duration: duration ?? this.duration,
       publishDate: publishDate ?? this.publishDate,
+      path: path ?? this.path,
       isDownload: isDownload ?? this.isDownload,
       downloadProgress: downloadProgress ?? this.downloadProgress,
     );
-  }
-
-  factory FileData.fromJson(Map<String, dynamic> json) {
-    return FileData(
-      id: json['id'] ?? '',
-      name: json['name'] ?? 'Unknown',
-      path: json['path'] as String?,
-      description: json['description'] as String?,
-      thumbnails: json['thumbnails'] as String?,
-      duration: json['duration'] != null ? Duration(seconds: json['duration']) : null,
-      publishDate: json['publishDate'] != null ? DateTime.tryParse(json['publishDate']) : null,
-      isDownload: json['isDownload'] ?? false,
-      downloadProgress: (json['downloadProgress'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'path': path,
-      'description': description,
-      'thumbnails': thumbnails,
-      'duration': duration?.inSeconds,
-      'publishDate': publishDate?.toIso8601String(),
-      'isDownload': isDownload,
-      'downloadProgress': downloadProgress,
-    };
   }
 }

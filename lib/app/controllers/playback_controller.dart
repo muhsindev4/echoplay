@@ -4,42 +4,55 @@ import 'package:get/get.dart';
 import 'package:play/app/data/models/file_data.dart';
 
 class PlaybackController extends GetxController {
-  final AudioPlayer player = AudioPlayer();
-  final ConcatenatingAudioSource playlist = ConcatenatingAudioSource(children: []);
-  final RxInt currentIndex = 0.obs;
+  final AudioPlayer _player = AudioPlayer();
+  final ConcatenatingAudioSource _playlist = ConcatenatingAudioSource(children: []);
+  final List<FileData> _currentFiles = [];
+   List<FileData> get currentFiles =>_currentFiles;
+
+  int _currentIndex = 0;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _player.currentIndexStream.listen((index) {
+      if (index != null) {
+        _currentIndex = index;
+        update();
+      }
+    });
+  }
 
   bool isPlaying(String path) {
-    return player.playing &&
-        player.currentIndex != null &&
-        playlist.children.isNotEmpty &&
-       ( playlist.children[player.currentIndex!] as UriAudioSource).uri.path==path;
+    return _player.playing &&
+        _player.currentIndex != null &&
+        _playlist.children.isNotEmpty &&
+        (_playlist.children[_player.currentIndex!] as UriAudioSource).uri.path == path;
   }
 
   Future<void> playAll(List<FileData> files) async {
     try {
-      playlist.clear(); // Clear existing playlist
-      for (var file in files) {
-        playlist.add(AudioSource.uri(
+      _playlist.clear();
+      _currentFiles.clear();
+      _currentFiles.addAll(files);
+
+      final sources = files.map((file) {
+        return AudioSource.uri(
           Uri.file(file.path!),
           tag: MediaItem(
             id: file.id.toString(),
             title: file.name,
             album: "Downloads",
             artist: "Unknown",
-            duration: file.duration,
-            artUri:Uri.tryParse(file.thumbnails??"") ,
+            duration:Duration(seconds:  file.duration!),
+            artUri: Uri.tryParse(file.thumbnails ?? ""),
             extras: {"filePath": file.path},
           ),
-        ));
-      }
-      await player.setAudioSource(playlist);
-      await player.play();
-      player.currentIndexStream.listen((index) {
-        if (index != null) {
-          currentIndex.value = index;
-        }
-      });
-      update();
+        );
+      }).toList();
+
+      _playlist.addAll(sources);
+      await _player.setAudioSource(_playlist);
+      await _player.play();
     } catch (e) {
       print("Error playing playlist: $e");
     }
@@ -47,46 +60,48 @@ class PlaybackController extends GetxController {
 
   Future<void> play(FileData file) async {
     try {
-      final audioSource = AudioSource.uri(
+      _currentFiles.clear();
+      _currentFiles.add(file);
+
+      final source = AudioSource.uri(
         Uri.file(file.path!),
         tag: MediaItem(
           id: file.id.toString(),
           title: file.name,
           album: "Downloads",
           artist: "Unknown",
+          duration:Duration(seconds: file.duration!) ,
+          artUri: Uri.tryParse(file.thumbnails ?? ""),
           extras: {"filePath": file.path},
         ),
       );
 
-      await player.setAudioSource(audioSource);
-      await player.play();
-      update();
+      await _player.setAudioSource(source);
+      await _player.play();
     } catch (e) {
       print("Error playing file: $e");
     }
   }
 
   void playNext() {
-    if (currentIndex.value < playlist.length - 1) {
-      player.seekToNext();
-      update();
-    }
+    _player.seekToNext();
   }
 
   void playPrevious() {
-    if (currentIndex.value > 0) {
-      player.seekToPrevious();
-      update();
-    }
+    _player.seekToPrevious();
   }
 
   void pause() {
-    player.pause();
-    update();
+    _player.pause();
   }
 
   void stop() {
-    player.stop();
-    update();
+    _player.stop();
+  }
+
+  /// Get the currently playing FileData, or null if not available
+  FileData? getCurrentFileData() {
+    if (_currentFiles.isEmpty || _player.currentIndex == null) return null;
+    return _currentFiles[_player.currentIndex!];
   }
 }
