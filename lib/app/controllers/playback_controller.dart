@@ -55,7 +55,7 @@ class PlaybackController extends GetxController {
       _playlist.addAll(sources);
       await _player.setAudioSource(_playlist);
       await _player.play();
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 1));
       update();
     } catch (e) {
       print("Error playing playlist: $e");

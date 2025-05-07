@@ -12,7 +12,12 @@ class DownloadController extends GetxController {
    Box<FileData>? _fileBox;
   final YoutubeExplode _yt = YoutubeExplode();
 
-  List<FileData> get files =>_fileBox==null?[]: _fileBox!.values.toList();
+   List<FileData> get files {
+     if (_fileBox == null) return [];
+     final fileList = _fileBox!.values.toList();
+     fileList.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+     return fileList;
+   }
 
   @override
   void onReady() async {
@@ -20,7 +25,14 @@ class DownloadController extends GetxController {
     _fileBox = Hive.box<FileData>('downloads');
   }
 
-  Future<void> startDownload(String url) async {
+   @override
+   void onInit() async {
+     super.onInit();
+     _fileBox = Hive.box<FileData>('downloads');
+   }
+
+
+   Future<void> startDownload(String url) async {
     try {
       final videoId = VideoId(url);
       final video = await _yt.videos.get(videoId);
@@ -74,7 +86,7 @@ class DownloadController extends GetxController {
       description: video.description,
       thumbnails: video.thumbnails.mediumResUrl,
       duration: video.duration?.inSeconds ,
-      publishDate: video.publishDate,
+      publishDate: video.publishDate, createdAt:  DateTime.now(),
     );
     _fileBox!.put(file.id, file);
     update();

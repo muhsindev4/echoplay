@@ -31,14 +31,22 @@ class FileData extends HiveObject {
   @HiveField(8)
   final double downloadProgress;
 
+  @HiveField(9)
+  final DateTime createdAt;
+
+  @HiveField(10)
+  final int? playlistId;
+
   FileData({
     required this.id,
     required this.name,
     required this.description,
     required this.thumbnails,
+    required this.createdAt,
     this.duration,
     this.publishDate,
     this.path,
+    this.playlistId,
     this.isDownload = false,
     this.downloadProgress = 0.0,
   });
@@ -50,8 +58,10 @@ class FileData extends HiveObject {
     String? thumbnails,
     int? duration,
     DateTime? publishDate,
+    DateTime? createdAt,
     String? path,
     bool? isDownload,
+    int? playlistId,
     double? downloadProgress,
   }) {
     return FileData(
@@ -61,7 +71,9 @@ class FileData extends HiveObject {
       thumbnails: thumbnails ?? this.thumbnails,
       duration: duration ?? this.duration,
       publishDate: publishDate ?? this.publishDate,
+      createdAt: createdAt ?? this.createdAt,
       path: path ?? this.path,
+      playlistId: playlistId ?? this.playlistId,
       isDownload: isDownload ?? this.isDownload,
       downloadProgress: downloadProgress ?? this.downloadProgress,
     );

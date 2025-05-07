@@ -22,7 +22,7 @@ class DownloadPage extends StatelessWidget {
           GetBuilder<PlaybackController>(builder: (logic){
             if (_playbackController.getCurrentFileData() != null){
               return  CachedNetworkImage(
-                imageUrl: _playbackController.getCurrentFileData()!.thumbnails!,
+                imageUrl: _playbackController.getCurrentFileData()!.thumbnails,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
@@ -69,44 +69,79 @@ class DownloadPage extends StatelessWidget {
 
   Widget _buildDownloadTile(FileData file) {
     return GetBuilder<PlaybackController>(builder: (logic){
-      bool isPlaying =_playbackController.isPlaying(file.path!);
-      return Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: file.isDownload
-              ? Colors.white.withOpacity(0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+      bool isPlaying=false;
+      if(file.path!=null){
+        isPlaying =_playbackController.isPlaying(file.path!);
+      }
+
+      return Dismissible(
+        key: Key(file.path ?? file.name),
+        direction: DismissDirection.horizontal,
+        background: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.redAccent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.only(left: 20),
+          child: Icon(Icons.delete, color: Colors.white),
         ),
-        child: ListTile(
-          contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(file.thumbnails ?? 'https://placekitten.com/200/200'),
-            radius: 30,
+        secondaryBackground: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.redAccent,
+            borderRadius: BorderRadius.circular(12),
           ),
-          title: Text(
-            file.name,
-            maxLines: 1,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          alignment: Alignment.centerRight,
+          padding: EdgeInsets.only(right: 20),
+          child: Icon(Icons.delete, color: Colors.white),
+        ),
+        onDismissed: (direction) {
+          _downloadController.deleteFile(file.id); // Add this method in your controller
+          Get.snackbar('Deleted', '${file.name} has been removed.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.black87,
+              colorText: Colors.white);
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: file.isDownload
+                ? Colors.white.withOpacity(0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
           ),
-          subtitle: Text(
-            file.description ?? "",
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.grey[300]),
+          child: ListTile(
+            contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(file.thumbnails ?? 'https://placekitten.com/200/200'),
+              radius: 30,
+            ),
+            title: Text(
+              file.name,
+              maxLines: 1,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            subtitle: Text(
+              file.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.grey[300]),
+            ),
+            trailing: file.isDownload
+                ? IconButton(
+              icon: Icon(isPlaying?Icons.pause:Icons.play_arrow, color: Colors.white),
+              onPressed: () {
+                if(isPlaying){
+                  _playbackController.pause();
+                  return;
+                }
+                _playbackController.playAll([file,..._downloadController.files]);
+              },
+            )
+                : _buildDownloadProgress(file),
           ),
-          trailing: file.isDownload
-              ? IconButton(
-            icon: Icon(isPlaying?Icons.pause:Icons.play_arrow, color: Colors.white),
-            onPressed: () {
-              if(isPlaying){
-                _playbackController.pause();
-                return;
-              }
-              _playbackController.playAll([file,..._downloadController.files]);
-            },
-          )
-              : _buildDownloadProgress(file),
         ),
       );
     });
@@ -114,30 +149,21 @@ class DownloadPage extends StatelessWidget {
   }
 
   Widget _buildDownloadProgress(FileData file) {
-    return file.downloadProgress != null
-        ? Container(
-      width: 60,
-      child: Column(
-        children: [
-          JumpingDotsProgressIndicator(
-            fontSize: 20.0,
-            color: Colors.blueAccent,
-          ),
-          SizedBox(height: 8),
-          Text(
-            '${(file.downloadProgress! * 100).toStringAsFixed(0)}%',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-          ),
-        ],
-      ),
-    )
-        : ElevatedButton(
-      onPressed: () => _downloadController.startDownload(file.id),
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: Colors.blueAccent,
-      ),
-      child: Text("Download"),
-    );
-  }
+    return Container(
+    width: 60,
+    child: Column(
+      children: [
+        JumpingDotsProgressIndicator(
+          fontSize: 20.0,
+          color: Colors.blueAccent,
+        ),
+        SizedBox(height: 8),
+        Text(
+          '${(file.downloadProgress! * 100).toStringAsFixed(0)}%',
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+        ),
+      ],
+    ),
+  );
+    }
 }

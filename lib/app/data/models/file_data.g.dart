@@ -21,9 +21,11 @@ class FileDataAdapter extends TypeAdapter<FileData> {
       name: fields[1] as String,
       description: fields[2] as String,
       thumbnails: fields[3] as String,
+      createdAt: fields[9] as DateTime,
       duration: fields[4] as int?,
       publishDate: fields[5] as DateTime?,
       path: fields[6] as String?,
+      playlistId: fields[10] as int?,
       isDownload: fields[7] as bool,
       downloadProgress: fields[8] as double,
     );
@@ -32,7 +34,7 @@ class FileDataAdapter extends TypeAdapter<FileData> {
   @override
   void write(BinaryWriter writer, FileData obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +52,11 @@ class FileDataAdapter extends TypeAdapter<FileData> {
       ..writeByte(7)
       ..write(obj.isDownload)
       ..writeByte(8)
-      ..write(obj.downloadProgress);
+      ..write(obj.downloadProgress)
+      ..writeByte(9)
+      ..write(obj.createdAt)
+      ..writeByte(10)
+      ..write(obj.playlistId);
   }
 
   @override
