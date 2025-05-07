@@ -68,41 +68,49 @@ class DownloadPage extends StatelessWidget {
   }
 
   Widget _buildDownloadTile(FileData file) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: file.isDownload
-            ? Colors.white.withOpacity(0.1)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        leading: CircleAvatar(
-          backgroundImage: NetworkImage(file.thumbnails ?? 'https://placekitten.com/200/200'),
-          radius: 30,
+    return GetBuilder<PlaybackController>(builder: (logic){
+      bool isPlaying =_playbackController.isPlaying(file.path!);
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: file.isDownload
+              ? Colors.white.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
         ),
-        title: Text(
-          file.name,
-          maxLines: 1,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+        child: ListTile(
+          contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(file.thumbnails ?? 'https://placekitten.com/200/200'),
+            radius: 30,
+          ),
+          title: Text(
+            file.name,
+            maxLines: 1,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          subtitle: Text(
+            file.description ?? "",
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Colors.grey[300]),
+          ),
+          trailing: file.isDownload
+              ? IconButton(
+            icon: Icon(isPlaying?Icons.pause:Icons.play_arrow, color: Colors.white),
+            onPressed: () {
+              if(isPlaying){
+                _playbackController.pause();
+                return;
+              }
+              _playbackController.playAll([file,..._downloadController.files]);
+            },
+          )
+              : _buildDownloadProgress(file),
         ),
-        subtitle: Text(
-          file.description ?? "",
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: Colors.grey[300]),
-        ),
-        trailing: file.isDownload
-            ? IconButton(
-          icon: Icon(Icons.play_arrow, color: Colors.white),
-          onPressed: () {
-            _playbackController.play(file);
-          },
-        )
-            : _buildDownloadProgress(file),
-      ),
-    );
+      );
+    });
+
   }
 
   Widget _buildDownloadProgress(FileData file) {

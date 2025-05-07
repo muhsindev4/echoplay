@@ -9,14 +9,14 @@ import '../data/models/file_data.dart';
 
 
 class DownloadController extends GetxController {
-  late Box<FileData> _fileBox;
+   Box<FileData>? _fileBox;
   final YoutubeExplode _yt = YoutubeExplode();
 
-  List<FileData> get files => _fileBox.values.toList();
+  List<FileData> get files =>_fileBox==null?[]: _fileBox!.values.toList();
 
   @override
-  void onInit() async {
-    super.onInit();
+  void onReady() async {
+    super.onReady();
     _fileBox = Hive.box<FileData>('downloads');
   }
 
@@ -76,7 +76,7 @@ class DownloadController extends GetxController {
       duration: video.duration?.inSeconds ,
       publishDate: video.publishDate,
     );
-    _fileBox.put(file.id, file);
+    _fileBox!.put(file.id, file);
     update();
   }
 
@@ -86,27 +86,27 @@ class DownloadController extends GetxController {
         String? path,
         double? downloadProgress,
       }) {
-    final file = _fileBox.get(id);
+    final file = _fileBox!.get(id);
     if (file != null) {
       final updated = file.copyWith(
         isDownload: isDownload ?? file.isDownload,
         path: path ?? file.path,
         downloadProgress: downloadProgress ?? file.downloadProgress,
       );
-      _fileBox.put(id, updated);
+      _fileBox!.put(id, updated);
       update();
     }
   }
 
   Future<void> deleteFile(String id) async {
-    final file = _fileBox.get(id);
+    final file = _fileBox!.get(id);
     if (file?.path != null && file!.path!.isNotEmpty) {
       final localFile = File(file.path!);
       if (await localFile.exists()) {
         await localFile.delete();
       }
     }
-    await _fileBox.delete(id);
+    await _fileBox!.delete(id);
     update();
   }
 }

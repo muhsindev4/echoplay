@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute:"/downloads",
       getPages: [
-        GetPage(name: "/home", page: () => HomeScreen()),
+
         GetPage(name: "/downloads", page: () => DownloadPage()),
       ],
     );

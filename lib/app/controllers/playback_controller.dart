@@ -23,10 +23,12 @@ class PlaybackController extends GetxController {
   }
 
   bool isPlaying(String path) {
-    return _player.playing &&
-        _player.currentIndex != null &&
-        _playlist.children.isNotEmpty &&
-        (_playlist.children[_player.currentIndex!] as UriAudioSource).uri.path == path;
+    // Check if the current audio is playing and matches the path
+    if (_player.playing) {
+      // Check if the current audio source path matches the given path
+      return _currentFiles.isNotEmpty && _currentFiles[_currentIndex].path == path;
+    }
+    return false;
   }
 
   Future<void> playAll(List<FileData> files) async {
@@ -53,6 +55,8 @@ class PlaybackController extends GetxController {
       _playlist.addAll(sources);
       await _player.setAudioSource(_playlist);
       await _player.play();
+      await Future.delayed(Duration(seconds: 2));
+      update();
     } catch (e) {
       print("Error playing playlist: $e");
     }
@@ -93,6 +97,7 @@ class PlaybackController extends GetxController {
 
   void pause() {
     _player.pause();
+    update();
   }
 
   void stop() {
