@@ -62,8 +62,8 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute:"/downloads",
+      title: "EchoPlay",
       getPages: [
-
         GetPage(name: "/downloads", page: () => DownloadPage()),
       ],
     );
