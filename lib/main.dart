@@ -14,6 +14,14 @@ import 'app/pages/home/home_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final appDocDir =
+      await getApplicationDocumentsDirectory(); // Get directory for app data storage
+  Hive.init(appDocDir.path); // Provide the path where Hive will store its boxes
+
+  // Register adapter and open box
+  Hive.registerAdapter(FileDataAdapter());
+  await Hive.openBox<FileData>('downloads');
+
   // Initialize JustAudioBackground
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.yt.play',
@@ -42,16 +50,6 @@ Future<void> main() async {
       ReceiveSharingIntent.instance.reset();
     }
   });
-
-  // Initialize Hive
-  WidgetsFlutterBinding.ensureInitialized();
-  final appDocDir =
-      await getApplicationDocumentsDirectory(); // Get directory for app data storage
-  Hive.init(appDocDir.path); // Provide the path where Hive will store its boxes
-
-  // Register adapter and open box
-  Hive.registerAdapter(FileDataAdapter());
-  await Hive.openBox<FileData>('downloads');
 
   runApp(MyApp());
 }
