@@ -16,11 +16,6 @@
 
 ---
 
-## 📸 Screenshots
-
-> *(Add screenshots here when available)*
-
----
 
 ## 🧰 Tech Stack
 
@@ -38,7 +33,7 @@
 
 ### 1. Clone the repository
 
-    git clone https://github.com/muhsindev4/echoplay.git
+    git clone https://github.com/your-username/echoplay.git
     cd echoplay
 ### 2. Install dependencies
 
