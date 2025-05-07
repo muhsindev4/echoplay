@@ -54,8 +54,7 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
 
-  final String? argument;
-  const MyApp({super.key, this.argument});
+
 
   @override
   Widget build(BuildContext context) {
