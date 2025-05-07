@@ -5,9 +5,11 @@ import 'package:play/app/data/models/file_data.dart';
 
 class PlaybackController extends GetxController {
   final AudioPlayer _player = AudioPlayer();
-  final ConcatenatingAudioSource _playlist = ConcatenatingAudioSource(children: []);
+  final ConcatenatingAudioSource _playlist = ConcatenatingAudioSource(
+    children: [],
+  );
   final List<FileData> _currentFiles = [];
-   List<FileData> get currentFiles =>_currentFiles;
+  List<FileData> get currentFiles => _currentFiles;
 
   int _currentIndex = 0;
 
@@ -26,7 +28,8 @@ class PlaybackController extends GetxController {
     // Check if the current audio is playing and matches the path
     if (_player.playing) {
       // Check if the current audio source path matches the given path
-      return _currentFiles.isNotEmpty && _currentFiles[_currentIndex].path == path;
+      return _currentFiles.isNotEmpty &&
+          _currentFiles[_currentIndex].path == path;
     }
     return false;
   }
@@ -37,20 +40,21 @@ class PlaybackController extends GetxController {
       _currentFiles.clear();
       _currentFiles.addAll(files);
 
-      final sources = files.map((file) {
-        return AudioSource.uri(
-          Uri.file(file.path!),
-          tag: MediaItem(
-            id: file.id.toString(),
-            title: file.name,
-            album: "Downloads",
-            artist: "Unknown",
-            duration:Duration(seconds:  file.duration!),
-            artUri: Uri.tryParse(file.thumbnails ?? ""),
-            extras: {"filePath": file.path},
-          ),
-        );
-      }).toList();
+      final sources =
+          files.map((file) {
+            return AudioSource.uri(
+              Uri.file(file.path!),
+              tag: MediaItem(
+                id: file.id.toString(),
+                title: file.name,
+                album: "Downloads",
+                artist: "Unknown",
+                duration: Duration(seconds: file.duration!),
+                artUri: Uri.tryParse(file.thumbnails ?? ""),
+                extras: {"filePath": file.path},
+              ),
+            );
+          }).toList();
 
       _playlist.addAll(sources);
       await _player.setAudioSource(_playlist);
@@ -74,7 +78,7 @@ class PlaybackController extends GetxController {
           title: file.name,
           album: "Downloads",
           artist: "Unknown",
-          duration:Duration(seconds: file.duration!) ,
+          duration: Duration(seconds: file.duration!),
           artUri: Uri.tryParse(file.thumbnails ?? ""),
           extras: {"filePath": file.path},
         ),

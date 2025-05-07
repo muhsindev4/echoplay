@@ -7,17 +7,16 @@ import 'package:hive/hive.dart';
 
 import '../data/models/file_data.dart';
 
-
 class DownloadController extends GetxController {
-   Box<FileData>? _fileBox;
+  Box<FileData>? _fileBox;
   final YoutubeExplode _yt = YoutubeExplode();
 
-   List<FileData> get files {
-     if (_fileBox == null) return [];
-     final fileList = _fileBox!.values.toList();
-     fileList.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-     return fileList;
-   }
+  List<FileData> get files {
+    if (_fileBox == null) return [];
+    final fileList = _fileBox!.values.toList();
+    fileList.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return fileList;
+  }
 
   @override
   void onReady() async {
@@ -25,14 +24,13 @@ class DownloadController extends GetxController {
     _fileBox = Hive.box<FileData>('downloads');
   }
 
-   @override
-   void onInit() async {
-     super.onInit();
-     _fileBox = Hive.box<FileData>('downloads');
-   }
+  @override
+  void onInit() async {
+    super.onInit();
+    _fileBox = Hive.box<FileData>('downloads');
+  }
 
-
-   Future<void> startDownload(String url) async {
+  Future<void> startDownload(String url) async {
     try {
       final videoId = VideoId(url);
       final video = await _yt.videos.get(videoId);
@@ -76,7 +74,10 @@ class DownloadController extends GetxController {
   }
 
   String sanitizeFileName(String name) {
-    return name.replaceAll(RegExp(r'[\\/*?:"<>|]'), '_');  // Replace invalid characters
+    return name.replaceAll(
+      RegExp(r'[\\/*?:"<>|]'),
+      '_',
+    ); // Replace invalid characters
   }
 
   void _addFile(Video video) {
@@ -85,19 +86,20 @@ class DownloadController extends GetxController {
       name: video.title,
       description: video.description,
       thumbnails: video.thumbnails.mediumResUrl,
-      duration: video.duration?.inSeconds ,
-      publishDate: video.publishDate, createdAt:  DateTime.now(),
+      duration: video.duration?.inSeconds,
+      publishDate: video.publishDate,
+      createdAt: DateTime.now(),
     );
     _fileBox!.put(file.id, file);
     update();
   }
 
   void _updateFileData(
-      String id, {
-        bool? isDownload,
-        String? path,
-        double? downloadProgress,
-      }) {
+    String id, {
+    bool? isDownload,
+    String? path,
+    double? downloadProgress,
+  }) {
     final file = _fileBox!.get(id);
     if (file != null) {
       final updated = file.copyWith(

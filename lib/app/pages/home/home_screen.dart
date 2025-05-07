@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
   final _downloadController = Get.put(DownloadController());
   final _playController = Get.put(PlaybackController());
 
-   HomeScreen({super.key});
+  HomeScreen({super.key});
 
   List<FileData> get songs => _downloadController.files;
 
@@ -21,13 +21,13 @@ class HomeScreen extends StatelessWidget {
       body: Stack(
         children: [
           /// Background Thumbnail + Blur
-          if(_playController.getCurrentFileData()!=null)
-          CachedNetworkImage(
-            imageUrl: _playController.getCurrentFileData()!.thumbnails!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
+          if (_playController.getCurrentFileData() != null)
+            CachedNetworkImage(
+              imageUrl: _playController.getCurrentFileData()!.thumbnails!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
             child: Container(color: Colors.black.withOpacity(0.7)),
@@ -71,7 +71,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     subtitle: Text(
-                      song.description??"",
+                      song.description ?? "",
                       style: TextStyle(color: Colors.grey[300]),
                     ),
                     trailing:

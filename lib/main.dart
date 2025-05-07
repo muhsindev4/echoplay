@@ -22,14 +22,17 @@ Future<void> main() async {
   );
 
   // Receive media sharing intent
-  ReceiveSharingIntent.instance.getMediaStream().listen((value) {
-    if (value.isNotEmpty) {
-      String? argument = value.first.path;
-      Get.put(DownloadController(), permanent: true).startDownload(argument);
-    }
-  }, onError: (err) {
-    print("getIntentDataStream error: $err");
-  });
+  ReceiveSharingIntent.instance.getMediaStream().listen(
+    (value) {
+      if (value.isNotEmpty) {
+        String? argument = value.first.path;
+        Get.put(DownloadController(), permanent: true).startDownload(argument);
+      }
+    },
+    onError: (err) {
+      print("getIntentDataStream error: $err");
+    },
+  );
 
   // Handle media intent when the app is opened
   ReceiveSharingIntent.instance.getInitialMedia().then((value) {
@@ -42,7 +45,8 @@ Future<void> main() async {
 
   // Initialize Hive
   WidgetsFlutterBinding.ensureInitialized();
-  final appDocDir = await getApplicationDocumentsDirectory(); // Get directory for app data storage
+  final appDocDir =
+      await getApplicationDocumentsDirectory(); // Get directory for app data storage
   Hive.init(appDocDir.path); // Provide the path where Hive will store its boxes
 
   // Register adapter and open box
@@ -53,18 +57,13 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-
-
-
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute:"/downloads",
+      initialRoute: "/downloads",
       title: "EchoPlay",
-      getPages: [
-        GetPage(name: "/downloads", page: () => DownloadPage()),
-      ],
+      getPages: [GetPage(name: "/downloads", page: () => DownloadPage())],
     );
   }
 }
