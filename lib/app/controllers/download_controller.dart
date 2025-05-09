@@ -29,18 +29,40 @@ class DownloadController extends GetxController {
     super.onInit();
     _fileBox = Hive.box<FileData>('downloads');
   }
-
   Future<void> startDownload(String url) async {
     try {
-      final videoId = VideoId(url);
+      final playlistRegex = RegExp(r'list=([a-zA-Z0-9_-]+)');
+      final match = playlistRegex.firstMatch(url);
+
+      if (match != null) {
+        // Handle playlist
+        final playlistId = PlaylistId(url);
+        final playlist = await _yt.playlists.get(playlistId);
+        final videos = await _yt.playlists.getVideos(playlist.id).toList();
+        for (final video in videos) {
+          _addFile(video);
+        }
+        for (final video in videos) {
+          await _downloadAudio(video.id);
+        }
+
+        Get.snackbar('Download Complete', 'All videos in the playlist downloaded.');
+      } else {
+        // Handle single video
+        final videoId = VideoId(url);
+        await _downloadAudio(videoId);
+
+        Get.snackbar('Download Complete', 'Video downloaded successfully.');
+      }
+    } catch (e) {
+      Get.snackbar('Download Error', e.toString());
+    }
+  }
+  Future<void> _downloadAudio(VideoId videoId) async {
+    try {
       final video = await _yt.videos.get(videoId);
       final manifest = await _yt.videos.streamsClient.getManifest(videoId);
       final audioStreamInfo = manifest.audioOnly.withHighestBitrate();
-
-      if (audioStreamInfo == null) {
-        Get.snackbar('Download Error', 'No suitable audio stream found.');
-        return;
-      }
 
       final fileName = sanitizeFileName('${videoId.value}_${video.title}.mp3');
       final dir = await getApplicationDocumentsDirectory();
