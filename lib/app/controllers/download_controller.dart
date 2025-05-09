@@ -43,7 +43,6 @@ class DownloadController extends GetxController {
 
       for(FileData data in _fileBox!.values){
         if(!data.isDownload){
-          print("CheckCheckCheck");
           await _downloadAudio(VideoId(data.id));
         }
       }
