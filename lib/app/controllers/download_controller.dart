@@ -18,17 +18,40 @@ class DownloadController extends GetxController {
     return fileList;
   }
 
+  bool _isDownloading = false;
+
   @override
   void onReady() async {
     super.onReady();
-    _fileBox = Hive.box<FileData>('downloads');
+    getData();
   }
 
   @override
   void onInit() async {
     super.onInit();
-    _fileBox = Hive.box<FileData>('downloads');
+    getData();
   }
+
+  Future<void> getData() async {
+    _fileBox = Hive.box<FileData>('downloads');
+
+    // Check if the box is initialized
+    if (_fileBox == null) return;
+
+    // Check if any files are not downloaded and we're not currently downloading
+    if (!_isDownloading && _fileBox!.values.any((data) => !data.isDownload)) {
+
+      for(FileData data in _fileBox!.values){
+        if(!data.isDownload){
+          print("CheckCheckCheck");
+          await _downloadAudio(VideoId(data.id));
+        }
+      }
+
+
+    }
+  }
+
   Future<void> startDownload(String url) async {
     try {
       final playlistRegex = RegExp(r'list=([a-zA-Z0-9_-]+)');
@@ -46,7 +69,10 @@ class DownloadController extends GetxController {
           await _downloadAudio(video.id);
         }
 
-        Get.snackbar('Download Complete', 'All videos in the playlist downloaded.');
+        Get.snackbar(
+          'Download Complete',
+          'All videos in the playlist downloaded.',
+        );
       } else {
         // Handle single video
         final videoId = VideoId(url);
@@ -58,8 +84,10 @@ class DownloadController extends GetxController {
       Get.snackbar('Download Error', e.toString());
     }
   }
+
   Future<void> _downloadAudio(VideoId videoId) async {
     try {
+      _isDownloading = true;
       final video = await _yt.videos.get(videoId);
       final manifest = await _yt.videos.streamsClient.getManifest(videoId);
       final audioStreamInfo = manifest.audioOnly.withHighestBitrate();
@@ -89,6 +117,7 @@ class DownloadController extends GetxController {
       await fileStream.close();
 
       _updateFileData(videoId.value, isDownload: true, path: filePath);
+      _isDownloading = false;
     } catch (e) {
       debugPrint("Download error: $e");
       Get.snackbar('Download Error', e.toString());

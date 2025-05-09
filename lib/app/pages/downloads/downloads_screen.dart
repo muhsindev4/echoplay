@@ -102,18 +102,82 @@ class DownloadPage extends StatelessWidget {
             padding: EdgeInsets.only(right: 20),
             child: Icon(Icons.delete, color: Colors.white),
           ),
-          onDismissed: (direction) {
-            _downloadController.deleteFile(
-              file.id,
-            ); // Add this method in your controller
-            Get.snackbar(
-              'Deleted',
-              '${file.name} has been removed.',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.black87,
-              colorText: Colors.white,
-            );
-          },
+            onDismissed: (direction) async {
+              final index = _downloadController.files.indexWhere((f) => f.id == file.id);
+
+              // Optimistically remove
+              _downloadController.files.removeAt(index);
+              final shouldDelete = await Get.dialog<bool>(
+                Center(
+                  child: Container(
+                    width: 300,
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 40),
+                          SizedBox(height: 16),
+                          Text(
+                            'Delete Download?',
+                            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'Are you sure you want to delete "${file.name}"?',
+                            style: TextStyle(color: Colors.grey[300], fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Colors.grey[800],
+                                  ),
+                                  onPressed: () => Get.back(result: false),
+                                  child: Text('Cancel', style: TextStyle(color: Colors.white)),
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Colors.redAccent,
+                                  ),
+                                  onPressed: () => Get.back(result: true),
+                                  child: Text('Delete', style: TextStyle(color: Colors.white)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                barrierDismissible: false,
+              );
+
+              if (shouldDelete == true) {
+                await _downloadController.deleteFile(file.id);
+                Get.snackbar(
+                  'Deleted',
+                  '${file.name} has been removed.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.black87,
+                  colorText: Colors.white,
+                );
+              } else {
+                _downloadController.files.insert(index, file);
+              }
+            },
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
